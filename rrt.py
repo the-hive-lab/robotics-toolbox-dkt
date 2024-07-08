@@ -48,7 +48,7 @@ class RRT:
                  rand_area,
                  expand_dis=3.0,
                  path_resolution=0.5,
-                 goal_sample_rate=0.001,
+                 goal_sample_rate=5,
                  max_iter=500,
                  play_area=None,
                  robot_radius=0.0,
@@ -261,8 +261,13 @@ def main(gx=6.0, gy=10.0):
     k = 1
     b = 2
     oblist = []
+    armposx = 0
+    armposy = 0
     for i in range(-2, 6):
         y = k*i + b
+        if i == 4:
+            armposx = i
+            armposy = y
         oblist.append((i, y, 0.5))
     # ====Search Path with RRT====
     obstacleList = [(5, 5, 1), (3, 6, 2), (3, 8, 2), (3, 10, 2), (7, 5, 2),
@@ -289,13 +294,21 @@ def main(gx=6.0, gy=10.0):
         for i in range(len(fpath)-1, -1, -1):
             x = np.append(x, fpath[i][0])
             y = np.append(y, fpath[i][1])
-        z = np.polyfit(x, y, 5)
+        z = np.polyfit(x, y, 10)
+        poly = np.poly1d(z)
+        Period = 5 #sec
+        polyarr = []
+        
         print(z)
         # Draw final path
         if show_animation:
             rrt.draw_graph()
             plt.plot([x for (x, y) in path], [y for (x, y) in path], '-r')
             plt.grid(True)
+            plt.plot([x for (x,y) in fpath], [poly(x) for (x,y) in fpath], '-b')
+            plt.plot(armposx, armposy, "-y")
+            for x,y in fpath:
+                print(x, poly(x))
             plt.pause(0.01)  # Need for Mac
             plt.show()
 
