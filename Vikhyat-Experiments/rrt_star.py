@@ -8,36 +8,31 @@ import math
 
 class Node:
     def __init__(self, config, parent=None, cost=0.0):
-        self.config = config  # 6D configuration (x, y, θ₁, θ₂, θ₃, θ₄)
+        self.config = config  # Configuration (x, y, θ₁, θ₂, θ₃, θ₄)
         self.parent = parent  # Pointer to the parent node
         self.cost = cost      # Cost from the root to this node (for RRT*)
 
 class RRTStar:
-    def __init__(self, start, goal, max_iterations=1000, step_size=0.5, goal_threshold=0.5, search_radius=1.0):
+    def __init__(self, start, goal, minCoords, maxCoords, max_iterations=1000, step_size=0.5, goal_threshold=0.5, search_radius=1.0):
         self.start = Node(start)  # Start configuration node
         self.goal = Node(goal)    # Goal configuration node
+        self.minCoords = minCoords
+        self.maxCoords = maxCoords
         self.max_iterations = max_iterations
         self.step_size = step_size
         self.goal_threshold = goal_threshold
         self.search_radius = search_radius
         self.tree = [self.start]  # List to store the nodes of the tree
 
-    # Euclidean distance between two 6D configurations
+    # Euclidean distance between two configurations
     def distance(self, q1, q2):
         return np.linalg.norm(np.array(q1) - np.array(q2))
 
-    # Function to randomly sample a configuration in the 6D space
+    # Function to randomly sample from the configuration space
     def sample_random_configuration(self, goal_bias=0.05):
         if random.random() < goal_bias:
             return self.goal.config
-        return [
-            random.uniform(-5, 5),   # Random x-coordinate
-            random.uniform(-5, 5),   # Random y-coordinate
-            random.uniform(-np.pi, np.pi),  # Random θ₁ (joint angle 1)
-            random.uniform(-np.pi, np.pi),  # Random θ₂ (joint angle 2)
-            random.uniform(-np.pi, np.pi),  # Random θ₃ (joint angle 3)
-            random.uniform(-np.pi, np.pi)   # Random θ₄ (joint angle 4)
-        ]
+        return np.random.uniform(low=self.minCoords,high=self.maxCoords)
 
     # Find the nearest node in the tree to a random configuration
     def nearest_neighbor(self, q_rand):
@@ -141,8 +136,8 @@ class RRTStar:
 
 # Example usage
 if __name__ == "__main__":
-    start_config = [0, 0, 0, 0, 0, 0]  # Initial 6D configuration
-    goal_config = [4, 4, np.pi/4, np.pi/3, -np.pi/6, np.pi/2]  # Goal 6D configuration
+    start_config = [0, 0, 0, 0, 0, 0]  # Initial configuration
+    goal_config = [4, 4, np.pi/4, np.pi/3, -np.pi/6, np.pi/2]  # Goal configuration
     
     rrt_star = RRTStar(start=start_config, goal=goal_config)
     path = rrt_star.rrt_star()
