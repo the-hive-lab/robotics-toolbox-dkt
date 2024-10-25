@@ -56,11 +56,8 @@ class RRTStar:
         direction = configB - configA
         length = np.linalg.norm(direction)
         if length < self.step_size:
-            if self.verbose and abs(configB[0]-0.77625166)<0.001: print(f'pre-approved {configB} from {configA}')
             return configB
         newConfig = configA + (direction / length) * self.step_size
-        if self.verbose and abs(newConfig[0]-0.77625166)<0.001: print(f'adjust-n-approved {newConfig} from {configA}')
-        # print(f'steered: AB={newConfig-configA}, AR={configB-configA}')
         return newConfig
 
     # Find all nodes within the search radius of a given config
@@ -106,10 +103,6 @@ class RRTStar:
             
             # Find nearby nodes within a certain radius to connect to the new node
             nearby_nodes = self.get_nearby_nodes(new_node.config)
-
-            # dx_ratio = (new_node.config-nearest_node.config)[0]/(q_rand-nearest_node.config)[0]
-            # dy_ratio = (new_node.config-nearest_node.config)[1]/(q_rand-nearest_node.config)[1]
-            # assert abs(dx_ratio-dy_ratio)<1e-3, f'{dx_ratio} mismatch {dy_ratio}'
         
             # Choose the parent with minimum cost to reach new_node
             min_cost_node = nearest_node
