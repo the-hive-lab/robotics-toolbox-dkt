@@ -27,18 +27,19 @@ class RRTStar:
         self.search_radius = search_radius
         self.has_collision = collisionChecker # Collision checker function (returns True if collision at a config)
         self.tree = [self.start]  # List to store the nodes of the tree
+        assert not self.has_collision(start), "Start node is in collision"
         self.verbose=verbose
-        np.random.seed(seed)
-
+        self.rng = np.random.default_rng(seed)
+        
     # Euclidean distance between two configurations
     def distance(self, q1, q2):
         return np.linalg.norm(np.array(q1) - np.array(q2))
 
     # Function to randomly sample from the configuration space
     def sample_random_configuration(self):
-        if np.random.rand() < self.goal_bias:
+        if self.rng.random() < self.goal_bias:
             return self.goal.config
-        return np.random.uniform(low=self.minCoords, high=self.maxCoords)
+        return self.rng.uniform(low=self.minCoords, high=self.maxCoords)
 
     # Find the nearest node in the tree to a given configuration
     def get_nearest_neighbor(self, config):
@@ -78,6 +79,8 @@ class RRTStar:
         node = self.goal
         while node is not None:
             path.append(node.config)
+            if self.has_collision(node.config):
+                print('womp womp collision found when connecting path')
             node = node.parent
         return path[::-1]  # Return path from start to goal
 
